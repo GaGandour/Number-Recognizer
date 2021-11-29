@@ -40,9 +40,7 @@ function PCA(A::Matrix, p::Int64)
         Sigma[i,i] = S[i]
     end
     Y = U[1:m,1:p]*Sigma[1:p,1:n]
-
-
-
+    print(S[1])
     return Y[1:m,1]
 end
 
