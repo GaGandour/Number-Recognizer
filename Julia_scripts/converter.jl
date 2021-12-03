@@ -1,17 +1,14 @@
 using Colors, Plots
 
-label = 7
-w, h = 28, 28
+function matriz_da_imagem(label, exemplo) # retorna a matriz de um exemplo de img com uma label
+  w, h = 28, 28
+  imagens = Array{UInt8}(undef, w, h, 1000)
+  read!(string("./training set/0/data", string(label), ".txt"), imagens)
 
-exemplo = 3
+  return imagens[1:28,1:28,exemplo]'
+end
 
-imagens = Array{UInt8}(undef, w, h, 1000)
-read!(string("./training set/0/data", string(label), ".txt"), imagens)
-
-imagem = imagens[1:28,1:28,exemplo]'
-
-#reinterpret(N0f8, imagens)
-plot(Gray.(imagem/255))
-# data[0:256, 0:256] = [255, 0, 0] # red patch in upper left
-# img = Image.fromarray(matriz, mode='L')
-# img.show()
+function imprime_imagem(label, exemplo) # imprime a img correspondente
+  imagem = matriz_da_imagem(label, exemplo)
+  plot(Gray.(imagem/255), title= string("Exemplo ", string(exemplo), " do numero ", string(label)))
+end
