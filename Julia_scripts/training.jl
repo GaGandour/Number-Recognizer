@@ -4,7 +4,7 @@
 =#
 
 module TrainingData
-export DigitReference
+export DigitReference, construct_digit_references, read_images, plot_image
 using ..PCACalculator
 
 "PCA de referência para um dígito"
@@ -28,4 +28,34 @@ function DigitReference(digit::Int,
     return DigitReference(digit, Y)
 end
 
+
+function read_images(label::Int, index::Union{Int, AbstractRange}) # retorna a matriz de um exemplo de img com uma label
+    w, h = 28, 28
+    imagens = Array{UInt8}(undef, w, h, 1000)
+    read!(string("./training set/0/data", string(label), ".txt"), imagens)
+    
+    #transpoe as imagens, converte pra float
+    imagens = permutedims(imagens, [2, 1, 3])
+    return imagens[:, :, index]/255
+end
+
+function construct_digit_references(sample_size::Int, p::Int)
+    refs = DigitReference[]
+    for i = 0:9
+        imgs = read_images(i, 1:sample_size)
+        push!(refs, DigitReference(i, [collect(img) for img in eachslice(imgs, dims=3)], p))
+    end
+    return refs
+end
+
+using Colors, Plots
+
+function plot_image(label::Int, index::Int) # imprime a img correspondente
+  imagem = read_image(label, exemplo)
+  plot(Gray.(imagem), title= string("Índice ", string(index), " do número ", string(label)))
+end
+
+function plot_image(image::Matrix{Float64}, label::Int)
+  plot(Gray.(image), title= string("Imagem", " do número ", string(label)))
+end
 end

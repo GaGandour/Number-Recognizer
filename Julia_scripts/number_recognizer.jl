@@ -7,7 +7,7 @@ include("PCA_calculator.jl")
 
 include("training.jl")
 using .TrainingData
-export DigitReference
+export DigitReference, construct_digit_references, read_images, plot_image
 
 include("image_classification.jl")
 using .ImageClassification
