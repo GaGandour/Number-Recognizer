@@ -3,8 +3,6 @@
     conjunto de treinamento
 =#
 
-include("PCA_calculator.jl")
-
 module TrainingData
 export DigitReference
 using ..PCACalculator
@@ -23,7 +21,7 @@ struct DigitReference
 end
 
 function DigitReference(digit::Int, 
-    base_images::Vector{Matrix{Float64}}, p::int)
+    base_images::Vector{Matrix{Float64}}, p::Int)
     #achar um Y representativo para o conjunto de Dados
     #por enquanto, a média
     Y = sum(PCA.(base_images, p)) / length(base_images)
