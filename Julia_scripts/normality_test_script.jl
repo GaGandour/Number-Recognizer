@@ -1,9 +1,9 @@
 using Plots, LinearAlgebra
 
-include("PCA_calculator.jl")
+include("PCACalculator.jl")
 using .PCACalculator
-include("training.jl")
-using .TrainingData
+include("digit_model.jl")
+using .DigitData
 
 ##
 #normalidade das normas
@@ -16,13 +16,13 @@ end
 
 ##
 
-refs = construct_digit_references(1000, 10)
+refs = construct_digit_models(1000, 10)
 
 for i = 0:9
     images = read_images(i, 1:1000)
 
     pcas = PCA.(collect.(eachslice(images, dims = 3)), 10)
-    norms = norm.(pca - refs[i+1].pc for pca in pcas)
+    norms = norm.(pca - refs[i+1].average_principal_component for pca in pcas)
 
     display(histogram(norms, lab="Normas para $i"))
 end
