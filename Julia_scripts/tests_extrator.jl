@@ -4,6 +4,9 @@ using Colors, Plots
     plot(Gray.(image), title= string("Imagem", " do número ", string(label)))
 end =#
   
+module TestExtractor
+export get_testLabels, get_testPixels, get_Image_byLabel_and_Matrix
+
 function get_testLabels()
     labels = Array{UInt8}(undef, 10008)
     read!(string("./training set/t10k-labels.idx1-ubyte"), labels)
@@ -34,8 +37,10 @@ function get_Image_byLabel_and_Matrix(pixels::Vector{UInt8}, label::Int64)
     return imagem/255
 end
 
-test_Labels = get_testLabels()
-test_pixels = get_testPixels()
+end
+
+#= test_Labels = get_testLabels()
+test_pixels = get_testPixels() =#
 
 #= n = 40
 
