@@ -3,15 +3,10 @@
 module NumberRecognizer
 
 #inclusão na ordem das dependências
-include("PCA_calculator.jl")
+include("PCACalculator.jl")
 
-include("training.jl")
-using .TrainingData
-export DigitReference, construct_digit_references, read_images, plot_image
-
-include("image_classification.jl")
-using .ImageClassification
-export classify_image
-
+include("digit_model.jl")
+using .DigitData
+export construct_digit_models, AverageClassifier, NormalClassifier, read_images, plot_image
 
 end
