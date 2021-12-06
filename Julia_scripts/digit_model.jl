@@ -85,11 +85,17 @@ using Distributions: Normal, cdf
 function (classifier::NormalClassifier)(image::Matrix{Float64}, p::Int, classes::Vector{DigitModel})
     image_Y = PCA(image, p)
 
-    p_values = Dict(class.digit => begin 
-                            dist = Normal(class.μ, class.σ)
-                            1 - cdf(dist, class.μ + norm(image_Y - class.average_principal_component)) -
-                                cdf(dist, class.μ - norm(image_Y - class.average_principal_component))
-                            end for class in classes)
+    dists = Dict(class.digit => Normal(class.μ, class.σ) for class in classes)
+
+    #cdf = cumulative distribution function
+    #using Distributions
+    #n = Normal(6, 1.5)
+    #valor_p = 1 - cdf(n, )
+    # ------------0-------a-------------μ-----------------||Y - PCA_medio||-------------------
+    p_values = Dict(class.digit => 1 - (cdf(dists[class.digit], class.μ + abs(class.μ - norm(image_Y - class.average_principal_component))) - 
+                                        cdf(dists[class.digit], class.μ - abs(class.μ - norm(image_Y - class.average_principal_component)))
+                                    )
+                                for class in classes)
     likely_digits = [class.digit for class in classes if p_values[class.digit] >= classifier.alpha_value]
     sort!(likely_digits, by = el -> p_values[el], rev = true)
     return NormalClassResult.(likely_digits, [p_values[d] for d in likely_digits], classifier.alpha_value, "Cálculo do valor-p")
