@@ -79,14 +79,16 @@ function correct_guesses_byMultRef()
     return acertos./total
 end
 
+##
+
 function generate_barPlot(byNorm::Vector{Float64}, byHypo::Vector{Float64})
-    ctg = repeat(["Sem teste de hipótese", "Com teste de hipótese"], inner = 10)
+    ctg = repeat(["Comparação com o PCA médio", "Comparação com múltiplos PCAs"], inner = 10)
     ticklabel = string.(collect('0':'9'))
     groupedbar([byNorm byHypo], bar_position = :dodge, bar_width=0.7, xticks=(1:10, ticklabel), group = ctg, xlabel = "Dígitos", ylabel = "Taxa de Acerto",
     title = "Taxa de acerto por dígito por método", lw = 0, framestyle = :box, legend = :bottomleft)
 end
 
-correct_by_norm = correct_guesses_byNorm()
-correct_by_multref = correct_guesses_byMultRef()
+# correct_by_norm = correct_guesses_byNorm()
+# correct_by_multref = correct_guesses_byMultRef()
 
 generate_barPlot(correct_by_norm, correct_by_multref)
