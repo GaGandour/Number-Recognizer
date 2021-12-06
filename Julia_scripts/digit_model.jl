@@ -4,7 +4,7 @@
 =#
 
 module DigitData
-export AverageClassifier, NormalClassifier, construct_digit_models, read_images, plot_image
+export AverageClassifier, NormalClassifier, MultipleReferenceClassifier, construct_digit_models, read_images, plot_image
 using ..PCACalculator
 using LinearAlgebra
 
@@ -12,14 +12,14 @@ using LinearAlgebra
 struct DigitModel
     digit::Int
     average_principal_component::Matrix{Float64}
+    principal_components::Vector{Matrix{Float64}}
     p::Int
-    μ::Float64
-    σ::Float64
-    function DigitModel(digit::Int, pc::Matrix{Float64}, μ::Float64, σ::Float64)
+    function DigitModel(digit::Int, average_principal_component::Matrix{Float64}, principal_components::Vector{Matrix{Float64}})
         if !(0 <= digit <= 9)
             error("Dígito deve estar entre 0 e 9")
         end
-        new(digit, pc, size(pc)[2], μ, σ)
+        #assumindo todos os PCs de mesma dimensão
+        new(digit, average_principal_component, principal_components, size(principal_components[1])[2])
     end
 end
 
@@ -27,11 +27,8 @@ using Statistics: mean, std
 
 function DigitModel(digit::Int, base_images::Vector{Matrix{Float64}}, p::Int)
     pcas = PCA.(base_images, p)
-    Y = sum(pcas) / length(base_images)
-    norms = norm.(pca - Y for pca in pcas)
-    μ = mean(norms)
-    σ = std(norms)
-    return DigitModel(digit, Y, μ, σ)
+    avg_pca = sum(pcas) / length(pcas)
+    return DigitModel(digit, avg_pca, pcas)
 end
 
 function construct_digit_models(sample_size::Int, p::Int)
@@ -99,6 +96,32 @@ function (classifier::NormalClassifier)(image::Matrix{Float64}, p::Int, classes:
     likely_digits = [class.digit for class in classes if p_values[class.digit] >= classifier.alpha_value]
     sort!(likely_digits, by = el -> p_values[el], rev = true)
     return NormalClassResult.(likely_digits, [p_values[d] for d in likely_digits], classifier.alpha_value, "Cálculo do valor-p")
+end
+
+struct MultipleReferenceClassifier <: Classifier
+    tol::Float64
+end
+
+struct MultRefResult <: ClassificationResult
+    digit::Int
+    min_dist::Float64
+    tolerance::Float64
+    method::String
+end
+
+#mudar tipo de retorno para indicar norma da diferença, tipo de comparação, etc
+function (classifier::MultipleReferenceClassifier)(image::Matrix{Float64}, p::Int, classes::Vector{DigitModel})
+    image_Y = PCACalculator.PCA(image, p)
+    
+    min_dist = Dict()
+    for i = getproperty.(classes, :digit)
+        min_dist[i] = minimum(norm, [pc - image_Y for pc in classes[i+1].principal_components])
+    end
+    
+    likely_digits = [key for key in keys(min_dist) if min_dist[key] < classifier.tol]
+    
+    #comapração com o PCA médio da categoria
+    return MultRefResult.(likely_digits, [min_dist[i] for i in likely_digits], classifier.tol, "Comparação com a média")
 end
 
 
